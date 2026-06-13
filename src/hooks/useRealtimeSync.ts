@@ -7,7 +7,8 @@ export function useRealtimeSync(operationId: string) {
   const store = useMojoStore.getState()
 
   useEffect(() => {
-    if (!operationId) return
+  console.log('useRealtimeSync operationId:', operationId)
+  if (!operationId) return
 
     // Load full state on mount
     loadOperation(operationId).then(({ operation, players, ships, rocks, refineryJobs, sales, expenses }) => {
@@ -54,7 +55,9 @@ export function useRealtimeSync(operationId: string) {
 
 // Reload a single table and update store
 async function reloadTable(table: string, operationId: string) {
+  console.log('reloadTable triggered:', table)
   const data = await loadOperation(operationId)
+  console.log('reloadTable data:', table, data)
   useMojoStore.setState((s) => ({
     operation: {
       ...s.operation,

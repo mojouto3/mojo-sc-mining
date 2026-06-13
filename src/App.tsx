@@ -22,14 +22,20 @@ export default function App() {
 
   const operation          = useMojoStore((s) => s.operation)
   const getEstimatedRevenue = useMojoStore((s) => s.getEstimatedRevenue)
+  const setOperationId = useMojoStore((s) => s.setOperationId)
 
  useRealtimeSync(session?.operationId ?? '')
 
-useEffect(() => {
+ useEffect(() => {
   const saved = localStorage.getItem('mojo_session')
   if (saved) {
-    try { setSession(JSON.parse(saved)) }
-    catch { localStorage.removeItem('mojo_session') }
+    try {
+      const s = JSON.parse(saved)
+      setSession(s)
+      setOperationId(s.operationId)
+    } catch {
+      localStorage.removeItem('mojo_session')
+    }
   }
 }, [])
 
@@ -37,9 +43,10 @@ useEffect(() => {
   if (!session) {
     return (
       <LandingView
-        onJoined={(operationId, playerId, inviteCode) =>
-          setSession({ operationId, playerId, inviteCode })
-        }
+        onJoined={(operationId, playerId, inviteCode) => {
+  setSession({ operationId, playerId, inviteCode })
+  setOperationId(operationId)
+   }}
       />
     )
   }
