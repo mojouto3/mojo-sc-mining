@@ -7,13 +7,12 @@ import { AddPlayerModal } from '@/components/AddPlayerModal'
 import { StatCard, EmptyState, Btn, Panel, PanelHeader } from '@/components/ui'
 
 export function PartyView() {
-  const { operation, resetOperation, getEstimatedRevenue, getNetProfit, getTotalExpenses } = useMojoStore((s) => ({
-    operation:          s.operation,
-    resetOperation:     s.resetOperation,
-    getEstimatedRevenue: s.getEstimatedRevenue,
-    getNetProfit:       s.getNetProfit,
-    getTotalExpenses:   s.getTotalExpenses,
-  }))
+  const operation      = useMojoStore((s) => s.operation)
+  const resetOperation = useMojoStore((s) => s.resetOperation)
+  const estRevenue = useMojoStore((s) => s.getEstimatedRevenue())
+  const netProfit  = useMojoStore((s) => s.getNetProfit())
+  const expenses   = useMojoStore((s) => s.getTotalExpenses())
+  
 
   const [showAddShip, setShowAddShip]     = useState(false)
   const [showAddPlayer, setShowAddPlayer] = useState(false)
@@ -21,9 +20,7 @@ export function PartyView() {
 
   const { ships, players } = operation
   const unassigned = players.filter((p) => !p.shipId)
-  const estRevenue = getEstimatedRevenue()
-  const netProfit  = getNetProfit()
-  const expenses   = getTotalExpenses()
+ 
 
   function handleReset() {
     if (!confirmReset) {
@@ -114,10 +111,8 @@ export function PartyView() {
 // ─── Op name inline edit ──────────────────────────────────────────────────────
 
 function OpNameInput() {
-  const { name, setOperationName } = useMojoStore((s) => ({
-    name:             s.operation.name,
-    setOperationName: s.setOperationName,
-  }))
+  const name             = useMojoStore((s) => s.operation.name)
+  const setOperationName = useMojoStore((s) => s.setOperationName)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft]     = useState(name)
 
