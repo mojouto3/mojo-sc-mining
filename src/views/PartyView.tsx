@@ -162,7 +162,12 @@ function UnassignedRow({ player, ships }: { player: Player; ships: ShipType[] })
     <div className="flex items-center gap-3 px-4 py-2.5">
       <Avatar handle={player.handle} role={player.operationRole} size="sm" />
       <div className="flex-1">
-        <span className="text-xs font-semibold text-slate-300">{player.handle}</span>
+        
+        {player.isFleetManager && (
+  <span className="text-[9px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded">
+    Fleet Manager
+  </span>
+)}
         <div className="mt-0.5"><RoleBadge role={player.operationRole} /></div>
       </div>
 
