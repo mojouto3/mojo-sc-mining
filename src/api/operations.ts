@@ -48,10 +48,11 @@ export async function joinOperation(
   operation_id: string,
   handle: string,
   operation_role: string = 'miner',
+  is_fleet_manager: boolean = false,
 ) {
   const { data, error } = await supabase
     .from('players')
-    .insert({ operation_id, handle, operation_role })
+    .insert({ operation_id, handle, operation_role, is_fleet_manager })
     .select()
     .single()
 

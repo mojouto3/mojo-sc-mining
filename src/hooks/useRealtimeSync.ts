@@ -82,6 +82,7 @@ function mapPlayer(p: any) {
   return {
     id:            p.id,
     handle:        p.handle,
+    isFleetManager: p.is_fleet_manager ?? false,
     operationRole: p.operation_role,
     shipRole:      p.ship_role,
     shipId:        p.ship_id ?? null,
