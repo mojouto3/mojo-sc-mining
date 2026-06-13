@@ -15,7 +15,7 @@ const STATUS_FILTERS: { value: RockStatus | 'all'; label: string }[] = [
 ]
 
 export function ScoutView() {
-  const { operation } = useMojoStore((s) => ({ operation: s.operation }))
+  const operation = useMojoStore((s) => s.operation)
 
   const [showAddRock, setShowAddRock] = useState(false)
   const [filter, setFilter]           = useState<RockStatus | 'all'>('all')

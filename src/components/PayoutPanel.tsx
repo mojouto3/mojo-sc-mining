@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Copy, Check, Wallet, Plus, X } from 'lucide-react'
+import { Copy, Check, Wallet, Plus } from 'lucide-react'
 import { useMojoStore } from '@/store'
+import { useShallow } from 'zustand/react/shallow'
 import { Avatar, Panel, PanelHeader, StatCard, Btn } from '@/components/ui'
 import type { SplitMethod } from '@/types'
 
@@ -26,24 +27,21 @@ function CopyButton({ text }: { text: string }) {
     </button>
   )
 }
+
 export function PayoutPanel() {
-  const { operation, setSplitMethod, addSale, addExpense, markPlayerPaid } = useMojoStore((s) => ({
-  operation:      s.operation,
-  setSplitMethod: s.setSplitMethod,
-  addSale:        s.addSale,
-  addExpense:     s.addExpense,
-  markPlayerPaid: s.markPlayerPaid,
-}))
-  const payouts   = useMojoStore((s) => s.getPayouts())
-  const netProfit = useMojoStore((s) => s.getNetProfit())
-  const revenue   = useMojoStore((s) => s.getTotalRevenue())
-  const expenses  = useMojoStore((s) => s.getTotalExpenses())
-  const estimated = useMojoStore((s) => s.getEstimatedRevenue())
+  const operation      = useMojoStore((s) => s.operation)
+  const setSplitMethod = useMojoStore((s) => s.setSplitMethod)
+  const addSale        = useMojoStore((s) => s.addSale)
+  const addExpense     = useMojoStore((s) => s.addExpense)
+  const markPlayerPaid = useMojoStore((s) => s.markPlayerPaid)
+  const payouts        = useMojoStore(useShallow((s) => s.getPayouts()))
+  const netProfit      = useMojoStore((s) => s.getNetProfit())
+  const revenue        = useMojoStore((s) => s.getTotalRevenue())
+  const expenses       = useMojoStore((s) => s.getTotalExpenses())
+  const estimated      = useMojoStore((s) => s.getEstimatedRevenue())
 
   const [showSaleForm, setShowSaleForm]       = useState(false)
   const [showExpenseForm, setShowExpenseForm] = useState(false)
-
-
 
   const { splitMethod, players, sales } = operation
   const holder = players.find((p) => p.operationRole === 'refine_hauler') ?? players[0]
@@ -51,10 +49,10 @@ export function PayoutPanel() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Gross revenue"        value={`${revenue.toLocaleString()} aUEC`} />
-        <StatCard label="Total expenses"       value={`${expenses.toLocaleString()} aUEC`} />
-        <StatCard label="Net profit"           value={`${netProfit.toLocaleString()} aUEC`} accent />
-        <StatCard label="Est. incl. refining"  value={`${estimated.toLocaleString()} aUEC`} />
+        <StatCard label="Gross revenue"       value={`${revenue.toLocaleString()} aUEC`} />
+        <StatCard label="Total expenses"      value={`${expenses.toLocaleString()} aUEC`} />
+        <StatCard label="Net profit"          value={`${netProfit.toLocaleString()} aUEC`} accent />
+        <StatCard label="Est. incl. refining" value={`${estimated.toLocaleString()} aUEC`} />
       </div>
 
       <Panel>
@@ -190,6 +188,7 @@ export function PayoutPanel() {
     </div>
   )
 }
+
 const SALE_MATERIALS = [
   'Quantainium', 'Bexalite', 'Taranite', 'Borase', 'Stileron',
   'Laranite', 'Agricium', 'Beryl', 'Diamond', 'Gold', 'Titanium',
@@ -201,10 +200,8 @@ const TDD_TERMINALS = [
 ]
 
 function AddSaleForm({ onClose }: { onClose: () => void }) {
-  const { operation, addSale } = useMojoStore((s) => ({
-    operation: s.operation,
-    addSale:   s.addSale,
-  }))
+  const operation = useMojoStore((s) => s.operation)
+  const addSale   = useMojoStore((s) => s.addSale)
 
   const [material, setMaterial] = useState('Quantainium')
   const [scu, setScu]           = useState<number>(0)
@@ -268,10 +265,8 @@ function AddSaleForm({ onClose }: { onClose: () => void }) {
 }
 
 function AddExpenseForm({ onClose }: { onClose: () => void }) {
-  const { operation, addExpense } = useMojoStore((s) => ({
-    operation:  s.operation,
-    addExpense: s.addExpense,
-  }))
+  const operation  = useMojoStore((s) => s.operation)
+  const addExpense = useMojoStore((s) => s.addExpense)
 
   const [description, setDescription] = useState('')
   const [amount, setAmount]           = useState<number>(0)

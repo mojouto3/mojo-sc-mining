@@ -17,7 +17,7 @@ const LASER_COUNT: Record<string, number> = {
 }
 
 export function MinerView() {
-  const { operation } = useMojoStore((s) => ({ operation: s.operation }))
+  const operation = useMojoStore((s) => s.operation)
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('')
   const [bagStatus, setBagStatus]               = useState<BagStatus>('empty')

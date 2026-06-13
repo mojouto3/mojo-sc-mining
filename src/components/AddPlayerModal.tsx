@@ -25,10 +25,8 @@ const SHIP_ROLES_FOR: Record<OperationRole, ShipRole[]> = {
 interface Props { onClose: () => void }
 
 export function AddPlayerModal({ onClose }: Props) {
-  const { operation, addPlayer } = useMojoStore((s) => ({
-    operation: s.operation,
-    addPlayer: s.addPlayer,
-  }))
+  const operation = useMojoStore((s) => s.operation)
+  const addPlayer = useMojoStore((s) => s.addPlayer)
 
   const [handle, setHandle]             = useState('')
   const [operationRole, setOperationRole] = useState<OperationRole>('miner')
