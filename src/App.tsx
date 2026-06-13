@@ -10,8 +10,8 @@ type View = 'party' | 'scout' | 'miner' | 'hauler'
 
 export default function App() {
   const [activeView, setActiveView] = useState<View>('party')
-  const operation          = useMojoStore((s) => s.operation)
-  const getEstimatedRevenue = useMojoStore((s) => s.getEstimatedRevenue)
+  const operation   = useMojoStore((s) => s.operation)
+  const estRevenue  = useMojoStore((s) => s.getEstimatedRevenue())
 
   const navItems = [
     { id: 'party'  as View, label: 'Party',  Icon: Users  },
@@ -22,7 +22,7 @@ export default function App() {
 
   const playerCount = operation.players.length
   const shipCount   = operation.ships.filter((s) => s.status === 'active').length
-  const estRevenue  = getEstimatedRevenue()
+  
 
   return (
     <div className="min-h-screen flex flex-col">
