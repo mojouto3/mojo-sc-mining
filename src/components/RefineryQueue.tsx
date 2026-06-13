@@ -49,10 +49,8 @@ function getProgress(job: RefineryJob): number {
 interface AddJobFormProps { onClose: () => void }
 
 function AddJobForm({ onClose }: AddJobFormProps) {
-  const { operation, addRefineryJob } = useMojoStore((s) => ({
-    operation: s.operation,
-    addRefineryJob: s.addRefineryJob,
-  }))
+  const operation      = useMojoStore((s) => s.operation)
+  const addRefineryJob = useMojoStore((s) => s.addRefineryJob)
 
   const [material, setMaterial]   = useState('Quantainium')
   const [scu, setScu]             = useState<number>(0)
@@ -155,11 +153,9 @@ function AddJobForm({ onClose }: AddJobFormProps) {
 }
 
 export function RefineryQueue() {
-  const { operation, updateRefineryJob, removeRefineryJob } = useMojoStore((s) => ({
-    operation:         s.operation,
-    updateRefineryJob: s.updateRefineryJob,
-    removeRefineryJob: s.removeRefineryJob,
-  }))
+  const operation        = useMojoStore((s) => s.operation)
+  const updateRefineryJob = useMojoStore((s) => s.updateRefineryJob)
+  const removeRefineryJob = useMojoStore((s) => s.removeRefineryJob)
 
   const [showForm, setShowForm] = useState(false)
   const [tick, setTick]         = useState(0)

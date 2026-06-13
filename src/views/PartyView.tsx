@@ -151,10 +151,8 @@ import { Avatar, RoleBadge } from '@/components/ui'
 import type { Player, Ship as ShipType } from '@/types'
 
 function UnassignedRow({ player, ships }: { player: Player; ships: ShipType[] }) {
-  const { assignPlayerToShip, removePlayer } = useMojoStore((s) => ({
-    assignPlayerToShip: s.assignPlayerToShip,
-    removePlayer:       s.removePlayer,
-  }))
+  const assignPlayerToShip = useMojoStore((s) => s.assignPlayerToShip)
+  const removePlayer       = useMojoStore((s) => s.removePlayer)
 
   return (
     <div className="flex items-center gap-3 px-4 py-2.5">

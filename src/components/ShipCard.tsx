@@ -31,12 +31,10 @@ interface Props {
 }
 
 export function ShipCard({ ship, players }: Props) {
-  const { updateShip, removeShip, updatePlayer, removePlayer } = useMojoStore((s) => ({
-    updateShip:    s.updateShip,
-    removeShip:    s.removeShip,
-    updatePlayer:  s.updatePlayer,
-    removePlayer:  s.removePlayer,
-  }))
+  const updateShip   = useMojoStore((s) => s.updateShip)
+  const removeShip   = useMojoStore((s) => s.removeShip)
+  const updatePlayer = useMojoStore((s) => s.updatePlayer)
+  const removePlayer = useMojoStore((s) => s.removePlayer)
 
   const [collapsed, setCollapsed] = useState(false)
   const [editLocation, setEditLocation] = useState(false)

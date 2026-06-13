@@ -26,18 +26,13 @@ interface Props {
 }
 
 export function RockCard({ rock, miners }: Props) {
-  const { updateRock, removeRock } = useMojoStore((s) => ({
-    updateRock: s.updateRock,
-    removeRock: s.removeRock,
-  }))
-
+  const updateRock = useMojoStore((s) => s.updateRock)
+  const removeRock = useMojoStore((s) => s.removeRock)
   const [collapsed, setCollapsed] = useState(false)
-
   const statusMeta = STATUS_OPTIONS.find((s) => s.value === rock.status) ?? STATUS_OPTIONS[0]
   const assignedMiner = miners.find((m) => m.id === rock.assignedMinerId)
-
   const totalOre = rock.ores.reduce((sum, o) => sum + o.percentage, 0)
-
+  
   return (
     <div className={`bg-slate-900/70 border rounded-xl overflow-hidden transition-all ${
       rock.status === 'done' ? 'border-slate-800/40 opacity-60' : 'border-slate-700/50'
