@@ -6,6 +6,7 @@ import { ScoutView } from '@/views/ScoutView'
 import { MinerView } from '@/views/MinerView'
 import { HaulerView } from '@/views/HaulerView'
 import { LandingView } from '@/views/LandingView'
+import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 
 type View = 'party' | 'scout' | 'miner' | 'hauler'
 
@@ -21,22 +22,31 @@ export default function App() {
 
   const operation          = useMojoStore((s) => s.operation)
   const getEstimatedRevenue = useMojoStore((s) => s.getEstimatedRevenue)
+  const setOperationId = useMojoStore((s) => s.setOperationId)
 
-  useEffect(() => {
-    const saved = localStorage.getItem('mojo_session')
-    if (saved) {
-      try { setSession(JSON.parse(saved)) }
-      catch { localStorage.removeItem('mojo_session') }
+ useRealtimeSync(session?.operationId ?? '')
+
+ useEffect(() => {
+  const saved = localStorage.getItem('mojo_session')
+  if (saved) {
+    try {
+      const s = JSON.parse(saved)
+      setSession(s)
+      setOperationId(s.operationId)
+    } catch {
+      localStorage.removeItem('mojo_session')
     }
-  }, [])
+  }
+}, [])
 
   // All hooks above — safe to early return now
   if (!session) {
     return (
       <LandingView
-        onJoined={(operationId, playerId, inviteCode) =>
-          setSession({ operationId, playerId, inviteCode })
-        }
+        onJoined={(operationId, playerId, inviteCode) => {
+  setSession({ operationId, playerId, inviteCode })
+  setOperationId(operationId)
+   }}
       />
     )
   }
