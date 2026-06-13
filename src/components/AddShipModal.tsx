@@ -26,9 +26,12 @@ const TYPE_LABELS: Record<ShipType, string> = {
   refine_hauler: 'Refine Hauler',
 }
 
-interface Props { onClose: () => void }
+interface Props { 
+  onClose: () => void
+  currentPlayerId: string
+}
 
-export function AddShipModal({ onClose }: Props) {
+export function AddShipModal({ onClose, currentPlayerId }: Props) {
   const addShip = useMojoStore((s) => s.addShip)
   const [name, setName]       = useState('')
   const [model, setModel]     = useState(SHIP_MODELS[0].model)
@@ -36,17 +39,17 @@ export function AddShipModal({ onClose }: Props) {
 
   const selectedModel = SHIP_MODELS.find((m) => m.model === model) ?? SHIP_MODELS[0]
 
-  function handleSubmit() {
-    if (!name.trim()) return
-    addShip({
-      name: name.trim(),
-      model: selectedModel.model,
-      type: selectedModel.type,
-      status: 'active',
-      location: location.trim() || 'Unknown',
-    })
-    onClose()
-  }
+ function handleSubmit() {
+  if (!name.trim()) return
+  addShip({
+    name: name.trim(),
+    model: selectedModel.model,
+    type: selectedModel.type,
+    status: 'active',
+    location: location.trim() || 'Unknown',
+  } as any, currentPlayerId)
+  onClose()
+}
 
   return (
     <div

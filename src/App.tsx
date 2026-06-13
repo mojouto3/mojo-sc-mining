@@ -19,6 +19,7 @@ interface Session {
 export default function App() {
   const [activeView, setActiveView] = useState<View>('party')
   const [session, setSession]       = useState<Session | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const operation          = useMojoStore((s) => s.operation)
   const getEstimatedRevenue = useMojoStore((s) => s.getEstimatedRevenue)
@@ -85,9 +86,16 @@ export default function App() {
             <span className="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700/60 text-slate-400">
               {shipCount} {shipCount === 1 ? 'ship' : 'ships'} active
             </span>
-            <span className="px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold font-mono">
-              {session.inviteCode}
-            </span>
+            <button
+              onClick={() => {
+              navigator.clipboard.writeText(session.inviteCode)
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            }}
+  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold font-mono hover:bg-amber-500/20 transition-all cursor-pointer"
+>
+  {copied ? '✓ Copied!' : session.inviteCode}
+</button>
             {estRevenue > 0 && (
               <span className="px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold">
                 ~{estRevenue.toLocaleString()} aUEC
@@ -115,7 +123,7 @@ export default function App() {
       </header>
 
       <main className="flex-1 max-w-screen-xl w-full mx-auto px-4 py-6">
-        {activeView === 'party'  && <PartyView />}
+        {activeView === 'party' && <PartyView currentPlayerId={session.playerId} />}
         {activeView === 'scout'  && <ScoutView />}
         {activeView === 'miner'  && <MinerView />}
         {activeView === 'hauler' && <HaulerView />}
