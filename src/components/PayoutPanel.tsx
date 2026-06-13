@@ -27,31 +27,23 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 export function PayoutPanel() {
-  const {
-    operation, getPayouts, getNetProfit, getTotalRevenue,
-    getTotalExpenses, getEstimatedRevenue, setSplitMethod,
-    addSale, addExpense, markPlayerPaid,
-  } = useMojoStore((s) => ({
-    operation:           s.operation,
-    getPayouts:          s.getPayouts,
-    getNetProfit:        s.getNetProfit,
-    getTotalRevenue:     s.getTotalRevenue,
-    getTotalExpenses:    s.getTotalExpenses,
-    getEstimatedRevenue: s.getEstimatedRevenue,
-    setSplitMethod:      s.setSplitMethod,
-    addSale:             s.addSale,
-    addExpense:          s.addExpense,
-    markPlayerPaid:      s.markPlayerPaid,
-  }))
+  const { operation, setSplitMethod, addSale, addExpense, markPlayerPaid } = useMojoStore((s) => ({
+  operation:      s.operation,
+  setSplitMethod: s.setSplitMethod,
+  addSale:        s.addSale,
+  addExpense:     s.addExpense,
+  markPlayerPaid: s.markPlayerPaid,
+}))
+  const payouts   = useMojoStore((s) => s.getPayouts())
+  const netProfit = useMojoStore((s) => s.getNetProfit())
+  const revenue   = useMojoStore((s) => s.getTotalRevenue())
+  const expenses  = useMojoStore((s) => s.getTotalExpenses())
+  const estimated = useMojoStore((s) => s.getEstimatedRevenue())
 
   const [showSaleForm, setShowSaleForm]       = useState(false)
   const [showExpenseForm, setShowExpenseForm] = useState(false)
 
-  const payouts   = getPayouts()
-  const netProfit = getNetProfit()
-  const revenue   = getTotalRevenue()
-  const expenses  = getTotalExpenses()
-  const estimated = getEstimatedRevenue()
+
 
   const { splitMethod, players, sales } = operation
   const holder = players.find((p) => p.operationRole === 'refine_hauler') ?? players[0]
