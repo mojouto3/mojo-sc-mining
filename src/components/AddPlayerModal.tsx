@@ -44,13 +44,14 @@ export function AddPlayerModal({ onClose }: Props) {
   function handleSubmit() {
     if (!handle.trim()) return
     addPlayer({
-      handle: handle.trim(),
-      operationRole,
-      shipRole,
-      shipId: shipId || null,
-      status: 'standby',
-      shareWeight,
-    })
+  handle: handle.trim(),
+  operationRole,
+  shipRole,
+  shipId: shipId || null,
+  status: 'standby',
+  shareWeight,
+  isFleetManager: false,
+})
     onClose()
   }
 

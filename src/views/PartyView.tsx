@@ -6,7 +6,11 @@ import { AddShipModal } from '@/components/AddShipModal'
 import { AddPlayerModal } from '@/components/AddPlayerModal'
 import { StatCard, EmptyState, Btn, Panel, PanelHeader } from '@/components/ui'
 
-export function PartyView() {
+interface PartyViewProps {
+  currentPlayerId: string
+}
+
+export function PartyView({ currentPlayerId }: PartyViewProps) {
   const operation      = useMojoStore((s) => s.operation)
   const resetOperation = useMojoStore((s) => s.resetOperation)
   const estRevenue = useMojoStore((s) => s.getEstimatedRevenue())
@@ -102,7 +106,7 @@ export function PartyView() {
       )}
 
       {/* ── Modals ── */}
-      {showAddShip   && <AddShipModal   onClose={() => setShowAddShip(false)} />}
+      {showAddShip && <AddShipModal onClose={() => setShowAddShip(false)} currentPlayerId={currentPlayerId} />}
       {showAddPlayer && <AddPlayerModal onClose={() => setShowAddPlayer(false)} />}
     </div>
   )
@@ -158,7 +162,12 @@ function UnassignedRow({ player, ships }: { player: Player; ships: ShipType[] })
     <div className="flex items-center gap-3 px-4 py-2.5">
       <Avatar handle={player.handle} role={player.operationRole} size="sm" />
       <div className="flex-1">
-        <span className="text-xs font-semibold text-slate-300">{player.handle}</span>
+        
+        {player.isFleetManager && (
+  <span className="text-[9px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded">
+    Fleet Manager
+  </span>
+)}
         <div className="mt-0.5"><RoleBadge role={player.operationRole} /></div>
       </div>
 

@@ -28,6 +28,7 @@ export type PlayerStatus =
 export interface Player {
   id: string
   handle: string              // in-game name
+  isFleetManager: boolean     // can manage operation settings
   shipId: string | null       // which ship they're on
   shipRole: ShipRole
   operationRole: OperationRole

@@ -36,13 +36,13 @@ export function ShipCard({ ship, players }: Props) {
   const updatePlayer = useMojoStore((s) => s.updatePlayer)
   const removePlayer = useMojoStore((s) => s.removePlayer)
 
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed]       = useState(false)
   const [editLocation, setEditLocation] = useState(false)
   const [locationDraft, setLocationDraft] = useState(ship.location)
 
-  const crew = players.filter((p) => p.shipId === ship.id)
+  const crew       = players.filter((p) => p.shipId === ship.id)
   const borderColor = SHIP_TYPE_COLORS[ship.type]
-  const statusMeta = SHIP_STATUS_LABELS[ship.status]
+  const statusMeta  = SHIP_STATUS_LABELS[ship.status]
 
   function saveLocation() {
     updateShip(ship.id, { location: locationDraft.trim() || ship.location })
@@ -51,7 +51,6 @@ export function ShipCard({ ship, players }: Props) {
 
   return (
     <div className={`bg-slate-900/70 border rounded-xl overflow-hidden transition-all ${borderColor}`}>
-      {/* Ship header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-800/60">
         <span className="text-lg" aria-hidden="true">{SHIP_TYPE_ICON[ship.type]}</span>
 
@@ -61,8 +60,6 @@ export function ShipCard({ ship, players }: Props) {
             <span className="text-xs text-slate-500 font-mono">{ship.model}</span>
             <Badge className={statusMeta.cls}>{statusMeta.label}</Badge>
           </div>
-
-          {/* Location */}
           <div className="flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3 text-slate-600 flex-shrink-0" />
             {editLocation ? (
@@ -85,7 +82,6 @@ export function ShipCard({ ship, players }: Props) {
           </div>
         </div>
 
-        {/* Ship status selector */}
         <select
           value={ship.status}
           onChange={(e) => updateShip(ship.id, { status: e.target.value as Ship['status'] })}
@@ -97,10 +93,8 @@ export function ShipCard({ ship, players }: Props) {
           <option value="standby">Standby</option>
         </select>
 
-        {/* Crew count */}
         <span className="text-[11px] font-mono text-slate-500">{crew.length} crew</span>
 
-        {/* Collapse */}
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="text-slate-600 hover:text-slate-400 transition-colors cursor-pointer p-0.5"
@@ -108,7 +102,6 @@ export function ShipCard({ ship, players }: Props) {
           {collapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
         </button>
 
-        {/* Remove ship */}
         <button
           onClick={() => removeShip(ship.id)}
           className="text-slate-700 hover:text-red-400 transition-colors cursor-pointer p-0.5"
@@ -118,7 +111,6 @@ export function ShipCard({ ship, players }: Props) {
         </button>
       </div>
 
-      {/* Crew list */}
       {!collapsed && (
         <div className="divide-y divide-slate-800/40">
           {crew.length === 0 ? (
@@ -157,6 +149,11 @@ function PlayerRow({ player, onStatusChange, onRemove }: PlayerRowProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-semibold text-slate-200">{player.handle}</span>
+          {player.isFleetManager && (
+            <span className="text-[9px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded">
+              Fleet Manager
+            </span>
+          )}
           <RoleBadge role={player.operationRole} />
         </div>
         <div className="text-[10px] text-slate-500 font-mono capitalize mt-0.5">
@@ -164,7 +161,6 @@ function PlayerRow({ player, onStatusChange, onRemove }: PlayerRowProps) {
         </div>
       </div>
 
-      {/* Status selector */}
       <select
         value={player.status}
         onChange={(e) => onStatusChange(e.target.value as PlayerStatus)}
