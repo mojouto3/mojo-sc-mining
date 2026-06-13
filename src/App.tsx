@@ -4,6 +4,7 @@ import { useMojoStore } from '@/store'
 import { PartyView } from '@/views/PartyView'
 import { ScoutView } from '@/views/ScoutView'
 import { MinerView } from '@/views/MinerView'
+import { HaulerView } from '@/views/HaulerView'
 
 type View = 'party' | 'scout' | 'miner' | 'hauler'
 
@@ -82,7 +83,7 @@ export default function App() {
         {activeView === 'party'  && <PartyView />}
         {activeView === 'scout'  && <ScoutView />}
         {activeView === 'miner' && <MinerView />}
-        {activeView === 'hauler' && <Placeholder title="Hauler view" sub="Refinery queue, TDD prices, payout" />}
+        {activeView === 'hauler' && <HaulerView />}
       </main>
 
       {/* ── Footer ── */}
