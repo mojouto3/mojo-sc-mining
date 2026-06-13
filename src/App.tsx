@@ -3,6 +3,7 @@ import { Diamond, Users, Radar, Hammer, Truck } from 'lucide-react'
 import { useMojoStore } from '@/store'
 import { PartyView } from '@/views/PartyView'
 import { ScoutView } from '@/views/ScoutView'
+import { MinerView } from '@/views/MinerView'
 
 type View = 'party' | 'scout' | 'miner' | 'hauler'
 
@@ -80,7 +81,7 @@ export default function App() {
       <main className="flex-1 max-w-screen-xl w-full mx-auto px-4 py-6">
         {activeView === 'party'  && <PartyView />}
         {activeView === 'scout'  && <ScoutView />}
-        {activeView === 'miner'  && <Placeholder title="Miner view"  sub="Assigned rock, laser tuning, bag status" />}
+        {activeView === 'miner' && <MinerView />}
         {activeView === 'hauler' && <Placeholder title="Hauler view" sub="Refinery queue, TDD prices, payout" />}
       </main>
 
