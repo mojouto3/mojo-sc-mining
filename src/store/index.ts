@@ -52,7 +52,7 @@ interface MojoStore {
   resetOperation: () => void
 
   // Ships
-  addShip: (ship: Omit<Ship, 'id' | 'crewIds'>) => Promise<void>
+  addShip: (ship: Omit<Ship, 'id' | 'crewIds'>, creatorPlayerId?: string) => Promise<void>
   updateShip: (id: string, patch: Partial<Ship>) => Promise<void>
   removeShip: (id: string) => Promise<void>
 
@@ -119,17 +119,22 @@ export const useMojoStore = create<MojoStore>()((set, get) => ({
   resetOperation: () => set({ operation: emptyOperation(), operationId: '' }),
 
   // ── Ships ──
-  addShip: async (ship) => {
-    const operationId = get().operationId
-    if (!operationId) return
-    const data = await dbAddShip(operationId, ship)
-    set((s) => ({
-      operation: {
-        ...s.operation,
-        ships: [...s.operation.ships, { ...ship, id: data.id, crewIds: [] }],
-      }
-    }))
-  },
+  addShip: async (ship, creatorPlayerId?: string) => {
+  const operationId = get().operationId
+  if (!operationId) return
+  const data = await dbAddShip(operationId, ship)
+  set((s) => ({
+  operation: {
+    ...s.operation,
+    ships: [...s.operation.ships, { ...ship, id: data.id, crewIds: [] }],
+  }
+}))
+  // Auto-assign creator as pilot
+  if (creatorPlayerId) {
+    const { updatePlayer } = get()
+    await updatePlayer(creatorPlayerId, { shipId: data.id, shipRole: 'pilot' })
+  }
+},
 
   updateShip: async (id, patch) => {
     set((s) => ({

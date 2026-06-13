@@ -47,10 +47,11 @@ export async function updateOperation(id: string, patch: Record<string, unknown>
 export async function joinOperation(
   operation_id: string,
   handle: string,
+  operation_role: string = 'miner',
 ) {
   const { data, error } = await supabase
     .from('players')
-    .insert({ operation_id, handle })
+    .insert({ operation_id, handle, operation_role })
     .select()
     .single()
 

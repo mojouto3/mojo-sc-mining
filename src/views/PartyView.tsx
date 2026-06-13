@@ -6,7 +6,11 @@ import { AddShipModal } from '@/components/AddShipModal'
 import { AddPlayerModal } from '@/components/AddPlayerModal'
 import { StatCard, EmptyState, Btn, Panel, PanelHeader } from '@/components/ui'
 
-export function PartyView() {
+interface PartyViewProps {
+  currentPlayerId: string
+}
+
+export function PartyView({ currentPlayerId }: PartyViewProps) {
   const operation      = useMojoStore((s) => s.operation)
   const resetOperation = useMojoStore((s) => s.resetOperation)
   const estRevenue = useMojoStore((s) => s.getEstimatedRevenue())
@@ -102,7 +106,7 @@ export function PartyView() {
       )}
 
       {/* ── Modals ── */}
-      {showAddShip   && <AddShipModal   onClose={() => setShowAddShip(false)} />}
+      {showAddShip && <AddShipModal onClose={() => setShowAddShip(false)} currentPlayerId={currentPlayerId} />}
       {showAddPlayer && <AddPlayerModal onClose={() => setShowAddPlayer(false)} />}
     </div>
   )

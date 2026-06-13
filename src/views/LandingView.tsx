@@ -7,20 +7,21 @@ interface Props {
 }
 
 export function LandingView({ onJoined }: Props) {
-  const [mode, setMode]         = useState<'home' | 'create' | 'join'>('home')
-  const [opName, setOpName]     = useState('')
-  const [handle, setHandle]     = useState('')
+  const [mode, setMode]             = useState<'home' | 'create' | 'join'>('home')
+  const [opName, setOpName]         = useState('')
+  const [handle, setHandle]         = useState('')
+  const [role, setRole]             = useState('')
   const [inviteCode, setInviteCode] = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
+  const [loading, setLoading]       = useState(false)
+  const [error, setError]           = useState('')
 
   async function handleCreate() {
-    if (!opName.trim() || !handle.trim()) return
+    if (!opName.trim() || !handle.trim() || !role) return
     setLoading(true)
     setError('')
     try {
       const op = await createOperation(opName.trim())
-      const player = await joinOperation(op.id, handle.trim())
+      const player = await joinOperation(op.id, handle.trim(), role)
       localStorage.setItem('mojo_session', JSON.stringify({
         operationId: op.id,
         playerId: player.id,
@@ -35,7 +36,7 @@ export function LandingView({ onJoined }: Props) {
   }
 
   async function handleJoin() {
-    if (!inviteCode.trim() || !handle.trim()) return
+    if (!inviteCode.trim() || !handle.trim() || !role) return
     setLoading(true)
     setError('')
     try {
@@ -44,7 +45,7 @@ export function LandingView({ onJoined }: Props) {
         setError('Invalid invite code. Check and try again.')
         return
       }
-      const player = await joinOperation(op.id, handle.trim())
+      const player = await joinOperation(op.id, handle.trim(), role)
       localStorage.setItem('mojo_session', JSON.stringify({
         operationId: op.id,
         playerId: player.id,
@@ -57,6 +58,23 @@ export function LandingView({ onJoined }: Props) {
       setLoading(false)
     }
   }
+
+  const roleSelect = (
+    <div>
+      <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Your role</label>
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        className="w-full bg-slate-900 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-amber-500 cursor-pointer"
+      >
+        <option value="" disabled>Select your role...</option>
+        <option value="scout">Scout</option>
+        <option value="miner">Miner</option>
+        <option value="raw_hauler">Raw Hauler</option>
+        <option value="refine_hauler">Refine Hauler</option>
+      </select>
+    </div>
+  )
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#020817' }}>
@@ -121,10 +139,10 @@ export function LandingView({ onJoined }: Props) {
                 placeholder="e.g. StarMinerX"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                 className="w-full bg-slate-900 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-amber-500 placeholder-slate-600"
               />
             </div>
+            {roleSelect}
 
             {error && (
               <div className="flex items-center gap-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
@@ -135,12 +153,12 @@ export function LandingView({ onJoined }: Props) {
 
             <button
               onClick={handleCreate}
-              disabled={!opName.trim() || !handle.trim() || loading}
+              disabled={!opName.trim() || !handle.trim() || !role || loading}
               className="w-full py-3 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-mono font-bold text-sm uppercase tracking-wide rounded-xl transition-all cursor-pointer"
             >
               {loading ? 'Creating...' : 'Create & Start'}
             </button>
-            <button onClick={() => { setMode('home'); setError('') }}
+            <button onClick={() => { setMode('home'); setError(''); setRole('') }}
               className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 font-mono transition-colors cursor-pointer">
               ← Back
             </button>
@@ -169,10 +187,10 @@ export function LandingView({ onJoined }: Props) {
                 placeholder="e.g. StarMinerX"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                 className="w-full bg-slate-900 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-amber-500 placeholder-slate-600"
               />
             </div>
+            {roleSelect}
 
             {error && (
               <div className="flex items-center gap-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
@@ -183,12 +201,12 @@ export function LandingView({ onJoined }: Props) {
 
             <button
               onClick={handleJoin}
-              disabled={inviteCode.length !== 6 || !handle.trim() || loading}
+              disabled={inviteCode.length !== 6 || !handle.trim() || !role || loading}
               className="w-full py-3 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-mono font-bold text-sm uppercase tracking-wide rounded-xl transition-all cursor-pointer"
             >
               {loading ? 'Joining...' : 'Join Operation'}
             </button>
-            <button onClick={() => { setMode('home'); setError('') }}
+            <button onClick={() => { setMode('home'); setError(''); setRole('') }}
               className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 font-mono transition-colors cursor-pointer">
               ← Back
             </button>
