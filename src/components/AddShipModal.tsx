@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Ship } from 'lucide-react'
 import { useMojoStore } from '@/store'
-import { Btn } from '@/components/ui'
+import { Btn, Combobox } from '@/components/ui'
 import type { ShipType } from '@/types'
 
 const SHIP_MODELS: { model: string; type: ShipType }[] = [
@@ -66,20 +66,16 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
         <div className="p-5 space-y-3 overflow-y-auto flex-1">
           <div>
             <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship model</label>
-            <select
-              autoFocus
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-500 cursor-pointer"
-            >
-              {(['scout', 'mining', 'raw_hauler', 'refine_hauler'] as ShipType[]).map((type) => (
-                <optgroup key={type} label={TYPE_LABELS[type]}>
-                  {SHIP_MODELS.filter((m) => m.type === type).map((m) => (
-                    <option key={m.model} value={m.model}>{m.model}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            <Combobox
+             value={model}
+             onChange={setModel}
+             placeholder="Select ship model..."
+             options={SHIP_MODELS.map((m) => ({
+             value: m.model,
+             label: m.model,
+             group: TYPE_LABELS[m.type],
+          }))}
+           />
           </div>
 
           <div>

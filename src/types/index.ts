@@ -64,12 +64,13 @@ export interface OreDeposit {
 
 export interface Rock {
   id: string
-  location: string            // e.g. "Lyria OM-1 — Cluster Alpha"
-  scoutedBy: string           // player handle
+  location: string
+  scoutedBy: string
   ores: OreDeposit[]
   status: RockStatus
   assignedMinerId: string | null
   notes: string
+  mass?: number
   scoutedAt: number
 }
 
