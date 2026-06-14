@@ -57,6 +57,7 @@ export interface Ship {
 
 export type RockStatus = 'scouted' | 'en_route' | 'mining' | 'done'
 
+
 export interface OreDeposit {
   materialId: string
   percentage: number
@@ -72,6 +73,7 @@ export interface Rock {
   notes: string
   mass?: number
   scoutedAt: number
+  cargoEntries?: { materialId: string; materialName: string; scu: number }[]
 }
 
 // ─── Refinery ─────────────────────────────────────────────────────────────────
