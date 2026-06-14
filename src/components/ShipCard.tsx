@@ -56,8 +56,9 @@ export function ShipCard({ ship, players }: Props) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-slate-100">{ship.name}</span>
-            <span className="text-xs text-slate-500 font-mono">{ship.model}</span>
+            <span className="text-sm font-bold text-slate-100">
+             {ship.name === ship.model ? ship.model : `${ship.model} · ${ship.name}`}
+             </span>
             <Badge className={statusMeta.cls}>{statusMeta.label}</Badge>
           </div>
           <div className="flex items-center gap-1 mt-0.5">
