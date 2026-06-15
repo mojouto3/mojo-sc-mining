@@ -135,6 +135,7 @@ function mapRefineryJob(j: any) {
     paidByPlayerId:     j.paid_by_player_id ?? '',
     yieldMultiplier:    j.yield_multiplier,
     estimatedValueAUEC: j.estimated_value_auec,
+    actualSaleAUEC:     j.actual_sale_auec ?? undefined,
   }
 }
 

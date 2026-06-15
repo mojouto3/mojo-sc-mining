@@ -16,7 +16,11 @@ const LASER_COUNT: Record<string, number> = {
   'Greycat ROC':     1,
 }
 
-export function MinerView() {
+interface MinerViewProps {
+  currentPlayerId: string
+}
+
+export function MinerView({ currentPlayerId }: MinerViewProps) {
   const operation = useMojoStore((s) => s.operation)
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('')

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Ship } from 'lucide-react'
 import { useMojoStore } from '@/store'
-import { Btn } from '@/components/ui'
+import { Btn, Combobox } from '@/components/ui'
 import type { ShipType } from '@/types'
 
 const SHIP_MODELS: { model: string; type: ShipType }[] = [
@@ -33,7 +33,7 @@ interface Props {
 
 export function AddShipModal({ onClose, currentPlayerId }: Props) {
   const addShip = useMojoStore((s) => s.addShip)
-  const [model, setModel]       = useState(SHIP_MODELS[3].model) // default: Prospector
+  const [model, setModel]       = useState(SHIP_MODELS[3].model)
   const [location, setLocation] = useState('')
 
   const selectedModel = SHIP_MODELS.find((m) => m.model === model) ?? SHIP_MODELS[3]
@@ -50,9 +50,8 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(2,8,23,0.88)' }}>
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl flex flex-col max-h-[85vh]">
-
+    <div className="modal-overlay">
+      <div className="modal-content">
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <Ship className="w-4 h-4 text-amber-500" />
@@ -63,25 +62,20 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
           </button>
         </div>
 
-        <div className="p-5 space-y-3 overflow-y-auto flex-1">
+        <div className="p-5 space-y-3">
           <div>
             <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship model</label>
-            <select
-              autoFocus
+            <Combobox
               value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-500 cursor-pointer"
-            >
-              {(['scout', 'mining', 'raw_hauler', 'refine_hauler'] as ShipType[]).map((type) => (
-                <optgroup key={type} label={TYPE_LABELS[type]}>
-                  {SHIP_MODELS.filter((m) => m.type === type).map((m) => (
-                    <option key={m.model} value={m.model}>{m.model}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+              onChange={setModel}
+              placeholder="Select ship model..."
+              options={SHIP_MODELS.map((m) => ({
+                value: m.model,
+                label: m.model,
+                group: TYPE_LABELS[m.type],
+              }))}
+            />
           </div>
-
           <div>
             <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">
               Current location <span className="text-slate-600">(optional)</span>
@@ -99,11 +93,8 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
 
         <div className="flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
           <Btn onClick={onClose}>Cancel</Btn>
-          <Btn variant="primary" onClick={handleSubmit}>
-            Add ship
-          </Btn>
+          <Btn variant="primary" onClick={handleSubmit}>Add ship</Btn>
         </div>
-
       </div>
     </div>
   )

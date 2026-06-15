@@ -34,18 +34,22 @@ export function PayoutPanel() {
   const addSale        = useMojoStore((s) => s.addSale)
   const addExpense     = useMojoStore((s) => s.addExpense)
   const markPlayerPaid = useMojoStore((s) => s.markPlayerPaid)
-  const payouts        = useMojoStore(useShallow((s) => s.getPayouts()))
-  const netProfit      = useMojoStore((s) => s.getNetProfit())
-  const revenue        = useMojoStore((s) => s.getTotalRevenue())
-  const expenses       = useMojoStore((s) => s.getTotalExpenses())
-  const estimated      = useMojoStore((s) => s.getEstimatedRevenue())
-
+  const getPayouts     = useMojoStore((s) => s.getPayouts)
+  const getNetProfit   = useMojoStore((s) => s.getNetProfit)
+  const getTotalRevenue = useMojoStore((s) => s.getTotalRevenue)
+  const getTotalExpenses = useMojoStore((s) => s.getTotalExpenses)
+  const getEstimatedRevenue = useMojoStore((s) => s.getEstimatedRevenue)
   const [showSaleForm, setShowSaleForm]       = useState(false)
-  const [showExpenseForm, setShowExpenseForm] = useState(false)
+const [showExpenseForm, setShowExpenseForm] = useState(false)
 
-  const { splitMethod, players, sales } = operation
-  const holder = players.find((p) => p.operationRole === 'refine_hauler') ?? players[0]
+const { splitMethod, players, sales } = operation
+const holder = players.find((p) => p.operationRole === 'refine_hauler') ?? players[0]
 
+  const payouts   = getPayouts()
+  const netProfit = getNetProfit()
+  const revenue   = getTotalRevenue()
+  const expenses  = getTotalExpenses()
+  const estimated = getEstimatedRevenue()
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
