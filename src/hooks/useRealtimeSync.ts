@@ -115,6 +115,8 @@ function mapRock(r: any) {
     status:          r.status,
     assignedMinerId: r.assigned_miner_id ?? null,
     notes:           r.notes ?? '',
+    mass:            r.mass ?? undefined,
+    cargoEntries:    r.cargo_entries ?? [],
     scoutedAt:       new Date(r.scouted_at).getTime(),
   }
 }

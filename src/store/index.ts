@@ -279,6 +279,8 @@ export const useMojoStore = create<MojoStore>()((set, get) => ({
     if (patch.assignedMinerId !== undefined) dbPatch.assigned_miner_id = patch.assignedMinerId
     if (patch.notes !== undefined) dbPatch.notes            = patch.notes
     if (patch.ores)               dbPatch.ores              = patch.ores
+    if (patch.mass !== undefined)         dbPatch.mass          = patch.mass
+    if (patch.cargoEntries !== undefined) dbPatch.cargo_entries = patch.cargoEntries
     if (Object.keys(dbPatch).length > 0) {
       await dbUpdateRock(id, dbPatch).catch(console.error)
     }
