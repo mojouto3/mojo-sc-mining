@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Ship } from 'lucide-react'
 import { useMojoStore } from '@/store'
-import { Btn } from '@/components/ui'
+import { Btn, Combobox } from '@/components/ui'
 import type { ShipType } from '@/types'
 
 const SHIP_MODELS: { model: string; type: ShipType }[] = [
@@ -26,100 +26,81 @@ const TYPE_LABELS: Record<ShipType, string> = {
   refine_hauler: 'Refine Hauler',
 }
 
-interface Props { 
+interface Props {
   onClose: () => void
   currentPlayerId: string
 }
 
 export function AddShipModal({ onClose, currentPlayerId }: Props) {
   const addShip = useMojoStore((s) => s.addShip)
-  const [name, setName]         = useState('')
-  const [model, setModel]       = useState(SHIP_MODELS[0].model)
+  const [model, setModel]       = useState(SHIP_MODELS[3].model)
   const [location, setLocation] = useState('')
 
-  const selectedModel = SHIP_MODELS.find((m) => m.model === model) ?? SHIP_MODELS[0]
+  const selectedModel = SHIP_MODELS.find((m) => m.model === model) ?? SHIP_MODELS[3]
 
- function handleSubmit() {
-  if (!name.trim()) return
-  addShip({
-    name: name.trim(),
-    model: selectedModel.model,
-    type: selectedModel.type,
-    status: 'active',
-    location: location.trim() || 'Unknown',
-  } as any, currentPlayerId)
-  onClose()
-}
+  function handleSubmit() {
+    addShip({
+      name:     selectedModel.model,
+      model:    selectedModel.model,
+      type:     selectedModel.type,
+      status:   'active',
+      location: location.trim() || 'Unknown',
+    } as any, currentPlayerId)
+    onClose()
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 px-4 pb-4" style={{ background: 'rgba(2,8,23,0.88)' }}>
-        <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(2,8,23,0.88)' }}>
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl">
 
-          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
-            <div className="flex items-center gap-2.5">
-              <Ship className="w-4 h-4 text-amber-500" />
-              <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Add Ship</h2>
-            </div>
-            <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">
-              <X className="w-4 h-4" />
-            </button>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <Ship className="w-4 h-4 text-amber-500" />
+            <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Add Ship</h2>
           </div>
-
-          <div className="p-5 space-y-3 overflow-y-auto flex-1">
-
-            <div>
-              <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship nickname</label>
-              <input
-                autoFocus
-                type="text"
-                placeholder='e.g. "Ironjaw"'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-500 placeholder-slate-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship model</label>
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-500 cursor-pointer"
-              >
-                {(['scout', 'mining', 'raw_hauler', 'refine_hauler'] as ShipType[]).map((type) => (
-                  <optgroup key={type} label={TYPE_LABELS[type]}>
-                    {SHIP_MODELS.filter((m) => m.type === type).map((m) => (
-                      <option key={m.model} value={m.model}>{m.model}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">
-                Current location <span className="text-slate-600">(optional)</span>
-              </label>
-              <input
-                type="text"
-                placeholder='e.g. "Lyria OM-1"'
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-500 placeholder-slate-600"
-              />
-            </div>
-
-          </div>
-
-          <div className="flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
-            <Btn onClick={onClose}>Cancel</Btn>
-            <Btn variant="primary" onClick={handleSubmit} disabled={!name.trim()}>
-              Add ship
-            </Btn>
-          </div>
-
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
         </div>
+
+        <div className="p-5 space-y-3">
+          <div>
+            <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship model</label>
+            <Combobox
+              value={model}
+              onChange={setModel}
+              placeholder="Select ship model..."
+              options={SHIP_MODELS.map((m) => ({
+                value: m.model,
+                label: m.model,
+                group: TYPE_LABELS[m.type],
+              }))}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">
+              Current location <span className="text-slate-600">(optional)</span>
+            </label>
+            <input
+              type="text"
+              placeholder='e.g. "Lyria OM-1"'
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-500 placeholder-slate-600"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
+          <Btn onClick={onClose}>Cancel</Btn>
+          <Btn variant="primary" onClick={handleSubmit}>
+            Add ship
+          </Btn>
+        </div>
+
+      </div>
     </div>
   )
 }

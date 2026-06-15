@@ -1,5 +1,7 @@
 import React from 'react'
 import type { OperationRole, PlayerStatus, ShipType } from '@/types'
+import { useState, useEffect, useRef } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 // ─── Role colors ──────────────────────────────────────────────────────────────
 
@@ -205,5 +207,107 @@ export function Btn({ variant = 'ghost', size = 'sm', className = '', ...props }
       className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
       {...props}
     />
+  )
+}
+// ─── Combobox ─────────────────────────────────────────────────────────────────
+
+interface ComboboxOption {
+  value: string
+  label: string
+  group?: string
+}
+
+interface ComboboxProps {
+  options: ComboboxOption[]
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  className?: string
+}
+
+export function Combobox({ options, value, onChange, placeholder = 'Search...', className = '' }: ComboboxProps) {
+  const [query, setQuery]     = useState('')
+  const [open, setOpen]       = useState(false)
+  const [highlighted, setHighlighted] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const selected = options.find((o) => o.value === value)
+
+  const filtered = query.trim() === ''
+    ? options
+    : options.filter((o) =>
+        o.label.toLowerCase().includes(query.toLowerCase()) ||
+        o.group?.toLowerCase().includes(query.toLowerCase())
+      )
+
+  useEffect(() => {
+    setHighlighted(0)
+  }, [query])
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setHighlighted((h) => Math.min(h + 1, filtered.length - 1)) }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); setHighlighted((h) => Math.max(h - 1, 0)) }
+    if (e.key === 'Enter')     { e.preventDefault(); if (filtered[highlighted]) { onChange(filtered[highlighted].value); setOpen(false); setQuery('') } }
+    if (e.key === 'Escape')    { setOpen(false); setQuery('') }
+  }
+
+  return (
+    <div ref={ref} className={`relative ${className}`}>
+      <div
+        className="w-full bg-slate-950 border border-slate-800 text-sm text-slate-200 rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer focus-within:border-amber-500"
+        onClick={() => { setOpen((o) => !o); setQuery('') }}
+      >
+        <span className={selected ? 'text-slate-200' : 'text-slate-600'}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronDown className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+      </div>
+
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+          <div className="p-2 border-b border-slate-800">
+            <input
+              autoFocus
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type to search..."
+              className="w-full bg-slate-950 text-sm text-slate-200 rounded px-2.5 py-1.5 focus:outline-none placeholder-slate-600"
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <div className="text-[11px] text-slate-600 font-mono text-center py-3">No results</div>
+            ) : (
+              filtered.map((option, idx) => (
+                <div
+                  key={option.value}
+                  onClick={() => { onChange(option.value); setOpen(false); setQuery('') }}
+                  className={`px-3 py-2 text-sm cursor-pointer flex items-center justify-between ${
+                    idx === highlighted ? 'bg-amber-500/10 text-amber-400' :
+                    option.value === value ? 'text-amber-400' : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {option.group && <span className="text-[10px] font-mono text-slate-600">{option.group}</span>}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

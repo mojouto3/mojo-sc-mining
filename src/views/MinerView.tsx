@@ -1,46 +1,80 @@
 import { useState } from 'react'
-import { Hammer, AlertTriangle, Bell } from 'lucide-react'
+import { Hammer, Bell, Plus, Minus, X } from 'lucide-react'
 import { useMojoStore } from '@/store'
-import { LaserTuner } from '@/components/LaserTuner'
-import { EmptyState, Panel, PanelHeader, StatCard } from '@/components/ui'
-import { BAG_STATUS_LABELS, BAG_STATUS_COLORS } from '@/data/laserData'
-import type { BagStatus } from '@/data/laserData'
+import { EmptyState, Panel, PanelHeader, Avatar, RoleBadge, Combobox } from '@/components/ui'
+import { getShipCapacity } from '@/data/shipData'
 
-const BAG_STATUSES: BagStatus[] = ['empty', 'filling', 'full', 'swapped']
+const COMMON_ORES = [
+  'Quantainium', 'Bexalite', 'Taranite', 'Borase', 'Stileron',
+  'Laranite', 'Agricium', 'Beryl', 'Diamond', 'Gold',
+  'Hephaestanite', 'Titanium', 'Iron', 'Corundum', 'Aluminum',
+]
 
-// Ship model → laser count
-const LASER_COUNT: Record<string, number> = {
-  'MISC Prospector': 1,
-  'ARGO MOLE':       3,
-  'RSI Arrastra':    3,
-  'Greycat ROC':     1,
+interface MinerViewProps {
+  currentPlayerId: string
 }
 
-export function MinerView() {
-  const operation = useMojoStore((s) => s.operation)
+export function MinerView({ currentPlayerId }: MinerViewProps) {
+  const operation    = useMojoStore((s) => s.operation)
+  const updatePlayer = useMojoStore((s) => s.updatePlayer)
+  const updateRock   = useMojoStore((s) => s.updateRock)
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('')
-  const [bagStatus, setBagStatus]               = useState<BagStatus>('empty')
-  const [swapRequested, setSwapRequested]       = useState(false)
+  const [newOreName, setNewOreName]             = useState('')
 
   const { players, ships, rocks } = operation
 
-  // Miners in the operation
-  const miners = players.filter((p) => p.operationRole === 'miner')
+  const miners = players.filter((p) =>
+    p.operationRole === 'miner' || p.operationRole === 'raw_hauler'
+  )
 
   const selectedPlayer = miners.find((p) => p.id === selectedPlayerId) ?? miners[0]
   const selectedShip   = ships.find((s) => s.id === selectedPlayer?.shipId)
   const assignedRock   = rocks.find((r) => r.assignedMinerId === selectedPlayer?.id)
+  const availableRocks = rocks.filter((r) => !r.assignedMinerId && r.status === 'scouted')
 
-  const laserCount = selectedShip
-    ? (LASER_COUNT[selectedShip.model] ?? 1)
-    : 1
+  const capacitySCU    = selectedShip ? getShipCapacity(selectedShip.model) : 32
+  const cargoEntries   = assignedRock?.cargoEntries ?? []
+  const totalFilledSCU = cargoEntries.reduce((s, e) => s + e.scu, 0)
+  const fillPct        = Math.min(100, Math.round((totalFilledSCU / capacitySCU) * 100))
+  const hasQuantainium = cargoEntries.some((e) => e.materialName === 'Quantainium' && e.scu > 0)
 
-  function handleSwapRequest() {
-    setSwapRequested(true)
-    setBagStatus('full')
-    setTimeout(() => setSwapRequested(false), 5000)
+  function adjustCargo(materialId: string, materialName: string, delta: number) {
+    if (!assignedRock) return
+    const existing = cargoEntries.find((e) => e.materialId === materialId)
+    let updated
+    if (existing) {
+      updated = cargoEntries
+        .map((e) => e.materialId === materialId ? { ...e, scu: Math.max(0, e.scu + delta) } : e)
+        .filter((e) => e.scu > 0)
+    } else if (delta > 0) {
+      updated = [...cargoEntries, { materialId, materialName, scu: delta }]
+    } else return
+    updateRock(assignedRock.id, { cargoEntries: updated })
   }
+
+  function addNewOre() {
+    if (!newOreName || !assignedRock) return
+    adjustCargo(newOreName.toLowerCase(), newOreName, 1)
+    setNewOreName('')
+  }
+
+  function callForSwap() {
+    if (!selectedPlayer) return
+    updatePlayer(selectedPlayer.id, { status: 'swapping' })
+  }
+
+  function clearCargo() {
+    if (!assignedRock) return
+    updateRock(assignedRock.id, { cargoEntries: [] })
+    if (selectedPlayer) updatePlayer(selectedPlayer.id, { status: 'mining' })
+  }
+
+  // All ores to show — union of rock ores + cargo entries
+  const allOreIds = new Set([
+    ...(assignedRock?.ores.map((o) => o.materialId) ?? []),
+    ...cargoEntries.map((e) => e.materialId),
+  ])
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -53,11 +87,10 @@ export function MinerView() {
             Miner View
           </h2>
           <p className="text-xs text-slate-500 font-mono mt-0.5">
-            Assigned rock, laser tuning, bag management
+            Assigned rock, cargo tracking, bag swap
           </p>
         </div>
 
-        {/* Miner selector */}
         {miners.length > 1 && (
           <select
             value={selectedPlayer?.id ?? ''}
@@ -77,40 +110,56 @@ export function MinerView() {
           message="No miners enlisted. Go to Party view and enlist pilots with the Miner role."
         />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* Left column — rock + bag */}
-          <div className="lg:col-span-1 space-y-4">
+          {/* Left — Rock info */}
+          <div className="space-y-4">
+
+            {/* Player info */}
+            <Panel>
+              <PanelHeader title="Miner" />
+              <div className="p-4 flex items-center gap-3">
+                <Avatar handle={selectedPlayer?.handle ?? ''} role="miner" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-slate-200">{selectedPlayer?.handle}</div>
+                  <div className="text-[10px] font-mono text-slate-500 mt-0.5">
+                    {selectedShip ? `${selectedShip.model} · ${capacitySCU} SCU capacity` : 'No ship assigned'}
+                  </div>
+                </div>
+                {selectedPlayer && <RoleBadge role={selectedPlayer.operationRole} />}
+              </div>
+            </Panel>
 
             {/* Assigned rock */}
             <Panel>
-              <PanelHeader
-                title="Assigned rock"
-                subtitle={selectedPlayer?.handle}
-              />
+              <PanelHeader title="Assigned rock" />
               {assignedRock ? (
                 <div className="p-4 space-y-3">
-                  <div className="text-sm font-semibold text-slate-200">{assignedRock.location}</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-slate-200">{assignedRock.location}</span>
+                    {assignedRock.mass && (
+                      <span className="text-[11px] font-mono text-slate-400">
+                        Mass: <span className="text-amber-400">{assignedRock.mass}</span>
+                      </span>
+                    )}
+                  </div>
 
-                  {/* Ore bars */}
                   {assignedRock.ores.length > 0 && (
                     <div className="space-y-1.5">
+                      <div className="text-[10px] font-mono text-slate-500 uppercase">Scout data</div>
                       {assignedRock.ores
                         .sort((a, b) => b.percentage - a.percentage)
                         .map((ore, idx) => (
                           <div key={ore.materialId} className="flex items-center gap-2">
                             <span className={`text-xs font-mono font-bold w-24 truncate ${
-                              idx === 0 ? 'text-amber-400' :
-                              idx === 1 ? 'text-sky-400' :
-                              'text-emerald-400'
+                              idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-sky-400' : 'text-emerald-400'
                             }`}>
                               {ore.materialId}
                             </span>
                             <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full ${
-                                  idx === 0 ? 'bg-amber-500' :
-                                  idx === 1 ? 'bg-sky-500' : 'bg-emerald-500'
+                                  idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-sky-500' : 'bg-emerald-500'
                                 }`}
                                 style={{ width: `${Math.min(100, ore.percentage)}%` }}
                               />
@@ -128,88 +177,167 @@ export function MinerView() {
                       {assignedRock.notes}
                     </div>
                   )}
+
+                  <button
+                    onClick={() => updateRock(assignedRock.id, { assignedMinerId: null, status: 'scouted' })}
+                    className="text-[10px] font-mono text-slate-600 hover:text-red-400 transition-colors cursor-pointer"
+                  >
+                    Unassign rock
+                  </button>
                 </div>
               ) : (
-                <div className="p-4 text-center text-xs text-slate-600 font-mono">
-                  No rock assigned — scout dispatches you from Scout view
+                <div className="p-4 space-y-3">
+                  <div className="text-center text-xs text-slate-600 font-mono">No rock assigned yet</div>
+                  {availableRocks.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-mono text-slate-500 uppercase">Available rocks</div>
+                      {availableRocks.map((rock) => (
+                        <div key={rock.id} className="flex items-center gap-3 bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-slate-200">{rock.location}</div>
+                            <div className="text-[10px] font-mono text-slate-500">
+                              {rock.ores.map((o) => `${o.materialId} ${o.percentage}%`).join(' · ')}
+                              {rock.mass && ` · mass ${rock.mass}`}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (selectedPlayer) {
+                                updateRock(rock.id, { assignedMinerId: selectedPlayer.id, status: 'en_route' })
+                                updatePlayer(selectedPlayer.id, { status: 'mining' })
+                              }
+                            }}
+                            className="text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-all cursor-pointer whitespace-nowrap"
+                          >
+                            On my way
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </Panel>
+          </div>
 
-            {/* Ship info */}
-            {selectedShip && (
-              <Panel>
-                <PanelHeader title="Ship" />
-                <div className="p-4 space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-500 font-mono">Name</span>
-                    <span className="text-slate-200 font-semibold">{selectedShip.name}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-500 font-mono">Model</span>
-                    <span className="text-slate-200">{selectedShip.model}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-500 font-mono">Lasers</span>
-                    <span className="text-amber-400 font-mono font-bold">{laserCount}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-500 font-mono">Location</span>
-                    <span className="text-slate-400">{selectedShip.location}</span>
-                  </div>
-                </div>
-              </Panel>
-            )}
-
-            {/* Bag status */}
+          {/* Right — Cargo tracker */}
+          <div className="space-y-4">
             <Panel>
-              <PanelHeader title="Bag status" subtitle="Signal when ready for swap" />
-              <div className="p-4 space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  {BAG_STATUSES.map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => { setBagStatus(status); setSwapRequested(false) }}
-                      className={`px-3 py-2 rounded-lg border text-[11px] font-mono font-bold uppercase tracking-wide transition-all cursor-pointer ${
-                        bagStatus === status
-                          ? BAG_STATUS_COLORS[status]
-                          : 'bg-slate-950 border-slate-800 text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      {BAG_STATUS_LABELS[status]}
+              <PanelHeader
+                title="Cargo"
+                subtitle={selectedShip ? `${selectedShip.model} · ${capacitySCU} SCU` : 'No ship'}
+                action={
+                  totalFilledSCU > 0 ? (
+                    <button onClick={clearCargo} className="text-[10px] font-mono text-slate-500 hover:text-red-400 transition-colors cursor-pointer">
+                      Clear
                     </button>
-                  ))}
+                  ) : undefined
+                }
+              />
+              <div className="p-4 space-y-4">
+
+                {/* Fill bar */}
+                <div>
+                  <div className="flex justify-between text-[11px] font-mono mb-1.5">
+                    <span className="text-slate-400">{totalFilledSCU} SCU filled</span>
+                    <span className={fillPct >= 90 ? 'text-orange-400 font-bold' : 'text-slate-500'}>
+                      {fillPct}% · {capacitySCU - totalFilledSCU} SCU free
+                    </span>
+                  </div>
+                  <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        fillPct >= 90 ? 'bg-orange-500' :
+                        fillPct >= 70 ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`}
+                      style={{ width: `${fillPct}%` }}
+                    />
+                  </div>
                 </div>
 
-                {/* Call for swap button */}
+                {/* Volatile warning */}
+                {hasQuantainium && (
+                  <div className="flex items-center gap-2 text-xs text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded-lg px-3 py-2">
+                    ⚠️ Quantainium in cargo — deliver to refinery ASAP
+                  </div>
+                )}
+
+                {/* Ore entries */}
+                <div className="space-y-2">
+                  <div className="text-[10px] font-mono text-slate-500 uppercase">Extracted ore</div>
+
+                  {allOreIds.size === 0 && (
+                    <div className="text-[11px] text-slate-600 font-mono text-center py-2">
+                      Add ore below as you extract
+                    </div>
+                  )}
+
+                  {[...allOreIds].map((oreId) => {
+                    const entry = cargoEntries.find((e) => e.materialId === oreId)
+                    const scu = entry?.scu ?? 0
+                    const name = entry?.materialName ?? oreId
+                    return (
+                      <div key={oreId} className="flex items-center gap-3">
+                        <span className="text-xs font-mono text-slate-300 flex-1 truncate">{name}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => adjustCargo(oreId, name, -1)}
+                            className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
+                          >
+                            <Minus className="w-3 h-3 text-slate-400" />
+                          </button>
+                          <span className="text-sm font-mono font-bold text-amber-400 w-8 text-center">{scu}</span>
+                          <button
+                            onClick={() => adjustCargo(oreId, name, 1)}
+                            className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
+                          >
+                            <Plus className="w-3 h-3 text-slate-400" />
+                          </button>
+                          <span className="text-[10px] font-mono text-slate-600">SCU</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Add new ore */}
+                  {assignedRock && (
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-800/40">
+                      <Combobox
+                        value={newOreName}
+                        onChange={setNewOreName}
+                        placeholder="Add ore..."
+                        options={COMMON_ORES.map((o) => ({ value: o, label: o }))}
+                        className="flex-1"
+                      />
+                      <button
+                        onClick={addNewOre}
+                        disabled={!newOreName}
+                        className="w-7 h-7 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 flex items-center justify-center cursor-pointer transition-colors disabled:opacity-40"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Call for swap */}
                 <button
-                  onClick={handleSwapRequest}
-                  disabled={bagStatus === 'swapped'}
+                  onClick={callForSwap}
+                  disabled={totalFilledSCU === 0 || selectedPlayer?.status === 'swapping'}
                   className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border font-mono font-bold text-xs uppercase tracking-wide transition-all cursor-pointer ${
-                    swapRequested
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse-slow'
-                      : bagStatus === 'swapped'
-                      ? 'bg-slate-800/20 border-slate-800 text-slate-600 cursor-not-allowed'
-                      : 'bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/20 text-orange-400'
+                    selectedPlayer?.status === 'swapping'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse'
+                      : fillPct >= 90
+                      ? 'bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/20 text-orange-400'
+                      : 'bg-slate-800/40 border-slate-700 text-slate-500 disabled:cursor-not-allowed'
                   }`}
                 >
                   <Bell className="w-3.5 h-3.5" />
-                  {swapRequested ? 'Swap requested!' : 'Call for swap'}
+                  {selectedPlayer?.status === 'swapping' ? 'Swap requested!' : 'Call for swap'}
                 </button>
 
-                {swapRequested && (
-                  <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-mono bg-emerald-500/5 border border-emerald-500/20 rounded-lg px-3 py-2">
-                    <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                    Hauler notified — bags ready for pickup
-                  </div>
-                )}
               </div>
             </Panel>
-          </div>
-
-          {/* Right column — laser tuner */}
-          <div className="lg:col-span-2">
-            <LaserTuner laserCount={laserCount} />
           </div>
 
         </div>

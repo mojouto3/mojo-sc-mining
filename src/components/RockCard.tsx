@@ -137,42 +137,24 @@ export function RockCard({ rock, miners }: Props) {
               ))}
             </div>
 
-            {/* Miner assignment */}
-            <div className="flex items-center gap-2 ml-auto">
-              {assignedMiner ? (
-                <div className="flex items-center gap-1.5">
-                  <Avatar handle={assignedMiner.handle} role={assignedMiner.operationRole} size="sm" />
-                  <span className="text-[11px] font-mono text-slate-300">{assignedMiner.handle}</span>
-                  <button
-                    onClick={() => updateRock(rock.id, { assignedMinerId: null })}
-                    className="text-slate-600 hover:text-red-400 transition-colors cursor-pointer"
-                    title="Unassign miner"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-slate-600" />
-                  <select
-                    defaultValue=""
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        updateRock(rock.id, { assignedMinerId: e.target.value, status: 'en_route' })
-                      }
-                    }}
-                    className="bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-300 rounded px-2 py-1 focus:outline-none focus:border-amber-500 cursor-pointer"
-                  >
-                    <option value="">Dispatch miner...</option>
-                    {miners.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.handle}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
+            {/* Who's mining this */}
+<div className="flex items-center gap-2 ml-auto">
+  {assignedMiner ? (
+    <div className="flex items-center gap-1.5">
+      <Avatar handle={assignedMiner.handle} role={assignedMiner.operationRole} size="sm" />
+      <span className="text-[11px] font-mono text-slate-300">{assignedMiner.handle}</span>
+      <button
+        onClick={() => updateRock(rock.id, { assignedMinerId: null, status: 'scouted' })}
+        className="text-slate-600 hover:text-red-400 transition-colors cursor-pointer"
+        title="Unassign"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </div>
+  ) : (
+    <span className="text-[10px] font-mono text-slate-600 italic">Unassigned</span>
+  )}
+</div>
           </div>
         </div>
       )}
