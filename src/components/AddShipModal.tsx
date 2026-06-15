@@ -33,7 +33,7 @@ interface Props {
 
 export function AddShipModal({ onClose, currentPlayerId }: Props) {
   const addShip = useMojoStore((s) => s.addShip)
-  const [model, setModel]       = useState(SHIP_MODELS[3].model) // default: Prospector
+  const [model, setModel]       = useState(SHIP_MODELS[3].model)
   const [location, setLocation] = useState('')
 
   const selectedModel = SHIP_MODELS.find((m) => m.model === model) ?? SHIP_MODELS[3]
@@ -51,7 +51,7 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(2,8,23,0.88)' }}>
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl flex flex-col max-h-[85vh]">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl">
 
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -63,19 +63,19 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
           </button>
         </div>
 
-        <div className="p-5 space-y-3 overflow-y-auto flex-1">
+        <div className="p-5 space-y-3">
           <div>
             <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship model</label>
             <Combobox
-             value={model}
-             onChange={setModel}
-             placeholder="Select ship model..."
-             options={SHIP_MODELS.map((m) => ({
-             value: m.model,
-             label: m.model,
-             group: TYPE_LABELS[m.type],
-          }))}
-           />
+              value={model}
+              onChange={setModel}
+              placeholder="Select ship model..."
+              options={SHIP_MODELS.map((m) => ({
+                value: m.model,
+                label: m.model,
+                group: TYPE_LABELS[m.type],
+              }))}
+            />
           </div>
 
           <div>
