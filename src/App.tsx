@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Diamond, Users, Radar, Hammer, Truck } from 'lucide-react'
+import { Diamond, Users, Radar, Hammer, Truck, DollarSign } from 'lucide-react'
 import { useMojoStore } from '@/store'
 import { PartyView } from '@/views/PartyView'
 import { ScoutView } from '@/views/ScoutView'
@@ -7,8 +7,11 @@ import { MinerView } from '@/views/MinerView'
 import { HaulerView } from '@/views/HaulerView'
 import { LandingView } from '@/views/LandingView'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
+import { SummaryView } from '@/views/SummaryView'
 
-type View = 'party' | 'scout' | 'miner' | 'hauler'
+
+
+type View = 'party' | 'scout' | 'miner' | 'hauler' | 'summary'
 
 interface Session {
   operationId: string
@@ -53,11 +56,12 @@ export default function App() {
   }
 
   const navItems = [
-    { id: 'party'  as View, label: 'Party',  Icon: Users  },
-    { id: 'scout'  as View, label: 'Scout',  Icon: Radar  },
-    { id: 'miner'  as View, label: 'Miner',  Icon: Hammer },
-    { id: 'hauler' as View, label: 'Hauler', Icon: Truck  },
-  ]
+  { id: 'party'   as View, label: 'Party',   Icon: Users       },
+  { id: 'scout'   as View, label: 'Scout',   Icon: Radar       },
+  { id: 'miner'   as View, label: 'Miner',   Icon: Hammer      },
+  { id: 'hauler'  as View, label: 'Hauler',  Icon: Truck       },
+  { id: 'summary' as View, label: 'Summary', Icon: DollarSign  },
+]
 
   const playerCount = operation.players.length
   const shipCount   = operation.ships.filter((s) => s.status === 'active').length
@@ -125,8 +129,9 @@ export default function App() {
       <main className="flex-1 max-w-screen-xl w-full mx-auto px-4 py-6">
         {activeView === 'party' && <PartyView currentPlayerId={session.playerId} />}
         {activeView === 'scout'  && <ScoutView />}
-        {activeView === 'miner'  && <MinerView />}
+        {activeView === 'miner'  && <MinerView currentPlayerId={session.playerId} />}
         {activeView === 'hauler' && <HaulerView />}
+        {activeView === 'summary' && <SummaryView currentPlayerId={session.playerId} />}
       </main>
 
       <footer className="border-t border-slate-900/80 py-4 text-center text-[10px] text-slate-700 font-mono">

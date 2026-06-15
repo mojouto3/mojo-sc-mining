@@ -71,6 +71,8 @@ export interface Rock {
   assignedMinerId: string | null
   notes: string
   scoutedAt: number
+  mass?: number
+ cargoEntries?: { materialId: string; materialName: string; scu: number }[]
 }
 
 // ─── Refinery ─────────────────────────────────────────────────────────────────
@@ -84,7 +86,7 @@ export type RefineMethod =
   | 'Electrostarolysis'
   | 'Kazen'
 
-export type RefineryJobStatus = 'queued' | 'processing' | 'done'
+export type RefineryJobStatus = 'queued' | 'processing' | 'done' | 'collected'
 
 export interface RefineryJob {
   id: string
@@ -97,10 +99,11 @@ export interface RefineryJob {
   status: RefineryJobStatus
   startedAt: number
   endsAt: number
-  feePaid: number             // aUEC cost
+  feePaid: number
   paidByPlayerId: string
-  yieldMultiplier: number     // e.g. 0.82 = 82%
+  yieldMultiplier: number
   estimatedValueAUEC: number
+  actualSaleAUEC?: number
 }
 
 // ─── Cargo / Sales ────────────────────────────────────────────────────────────

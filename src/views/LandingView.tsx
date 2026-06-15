@@ -21,7 +21,7 @@ export function LandingView({ onJoined }: Props) {
     setError('')
     try {
       const op = await createOperation(opName.trim())
-      const player = await joinOperation(op.id, handle.trim(), role)
+      const player = await joinOperation(op.id, handle.trim(), role, true)
       localStorage.setItem('mojo_session', JSON.stringify({
         operationId: op.id,
         playerId: player.id,
