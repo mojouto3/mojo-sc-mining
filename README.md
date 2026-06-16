@@ -1,6 +1,6 @@
 # Mojo Star Citizen Mining
 
-Cooperative mining operations manager for Star Citizen — real-time party coordination, scouting, refinery tracking, and payout splitting.
+Cooperative mining operations manager for Star Citizen ➔ real-time party coordination, scouting, refinery tracking, and payout splitting.
 
 > Unofficial fan tool. Not affiliated with Cloud Imperium Games. Data referenced via [UEXcorp.space](https://uexcorp.space).
 
