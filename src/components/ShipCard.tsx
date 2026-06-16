@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Trash2, ChevronDown, ChevronUp, MapPin, UserMinus } from 'lucide-react'
 import { useMojoStore } from '@/store'
 import {
-  Avatar, RoleBadge, StatusBadge, Badge,
-  SHIP_TYPE_COLORS, Btn,
+  Avatar, StatusBadge, Badge,
+  SHIP_TYPE_COLORS, ROLE_COLORS, Btn,
 } from '@/components/ui'
-import type { Ship, Player, PlayerStatus, ShipType } from '@/types'
+import type { Ship, Player, PlayerStatus, ShipType, OperationRole } from '@/types'
 
 const SHIP_TYPE_ICON: Record<ShipType, string> = {
   scout:         '📡',
@@ -25,6 +25,13 @@ const PLAYER_STATUSES: PlayerStatus[] = [
   'standby', 'scanning', 'mining', 'swapping', 'hauling', 'refining', 'selling', 'offline',
 ]
 
+const OPERATION_ROLES: { value: OperationRole; label: string }[] = [
+  { value: 'scout',         label: 'Scout' },
+  { value: 'miner',         label: 'Miner' },
+  { value: 'raw_hauler',    label: 'Raw Hauler' },
+  { value: 'refine_hauler', label: 'Refine Hauler' },
+]
+
 interface Props {
   ship: Ship
   players: Player[]
@@ -40,9 +47,9 @@ export function ShipCard({ ship, players }: Props) {
   const [editLocation, setEditLocation] = useState(false)
   const [locationDraft, setLocationDraft] = useState(ship.location)
 
-  const crew       = players.filter((p) => p.shipId === ship.id)
+  const crew        = players.filter((p) => p.shipId === ship.id)
   const borderColor = SHIP_TYPE_COLORS[ship.type]
-  const statusMeta  = SHIP_STATUS_LABELS[ship.status]
+  const statusMeta   = SHIP_STATUS_LABELS[ship.status]
 
   function saveLocation() {
     updateShip(ship.id, { location: locationDraft.trim() || ship.location })
@@ -57,8 +64,8 @@ export function ShipCard({ ship, players }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-bold text-slate-100">
-             {ship.name === ship.model ? ship.model : `${ship.model} · ${ship.name}`}
-             </span>
+              {ship.name === ship.model ? ship.model : `${ship.model} · ${ship.name}`}
+            </span>
             <Badge className={statusMeta.cls}>{statusMeta.label}</Badge>
           </div>
           <div className="flex items-center gap-1 mt-0.5">
@@ -124,6 +131,7 @@ export function ShipCard({ ship, players }: Props) {
                 key={player.id}
                 player={player}
                 onStatusChange={(status) => updatePlayer(player.id, { status })}
+                onRoleChange={(operationRole) => updatePlayer(player.id, { operationRole })}
                 onRemove={() => removePlayer(player.id)}
               />
             ))
@@ -139,10 +147,11 @@ export function ShipCard({ ship, players }: Props) {
 interface PlayerRowProps {
   player: Player
   onStatusChange: (s: PlayerStatus) => void
+  onRoleChange: (r: OperationRole) => void
   onRemove: () => void
 }
 
-function PlayerRow({ player, onStatusChange, onRemove }: PlayerRowProps) {
+function PlayerRow({ player, onStatusChange, onRoleChange, onRemove }: PlayerRowProps) {
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800/20 transition-colors">
       <Avatar handle={player.handle} role={player.operationRole} size="sm" />
@@ -155,7 +164,15 @@ function PlayerRow({ player, onStatusChange, onRemove }: PlayerRowProps) {
               Fleet Manager
             </span>
           )}
-          <RoleBadge role={player.operationRole} />
+          <select
+            value={player.operationRole}
+            onChange={(e) => onRoleChange(e.target.value as OperationRole)}
+            className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border cursor-pointer focus:outline-none ${ROLE_COLORS[player.operationRole]}`}
+          >
+            {OPERATION_ROLES.map((r) => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
+          </select>
         </div>
         <div className="text-[10px] text-slate-500 font-mono capitalize mt-0.5">
           {player.shipRole.replace('_', ' ')}

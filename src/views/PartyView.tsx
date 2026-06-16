@@ -4,7 +4,7 @@ import { useMojoStore } from '@/store'
 import { ShipCard } from '@/components/ShipCard'
 import { AddShipModal } from '@/components/AddShipModal'
 import { AddPlayerModal } from '@/components/AddPlayerModal'
-import { Avatar, RoleBadge, StatCard, EmptyState, Btn, Panel, PanelHeader } from '@/components/ui'
+import { Avatar, RoleBadge, ROLE_COLORS, StatCard, EmptyState, Btn, Panel, PanelHeader } from '@/components/ui'
 import type { Player, Ship as ShipType, ShipType as ShipTypeEnum } from '@/types'
 
 interface PartyViewProps {
@@ -212,6 +212,7 @@ function OpNameInput() {
 function UnassignedRow({ player, ships }: { player: Player; ships: ShipType[] }) {
   const assignPlayerToShip = useMojoStore((s) => s.assignPlayerToShip)
   const removePlayer       = useMojoStore((s) => s.removePlayer)
+  const updatePlayer = useMojoStore((s) => s.updatePlayer)
 
   return (
     <div className="flex items-center gap-3 px-4 py-2.5">
@@ -225,7 +226,18 @@ function UnassignedRow({ player, ships }: { player: Player; ships: ShipType[] })
             </span>
           )}
         </div>
-        <div className="mt-0.5"><RoleBadge role={player.operationRole} /></div>
+        <div className="mt-0.5">
+  <select
+    value={player.operationRole}
+    onChange={(e) => updatePlayer(player.id, { operationRole: e.target.value as any })}
+    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border cursor-pointer focus:outline-none ${ROLE_COLORS[player.operationRole]}`}
+  >
+    <option value="scout">Scout</option>
+    <option value="miner">Miner</option>
+    <option value="raw_hauler">Raw Hauler</option>
+    <option value="refine_hauler">Refine Hauler</option>
+  </select>
+</div>
       </div>
 
       <select
