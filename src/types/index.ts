@@ -87,7 +87,7 @@ export type RefineMethod =
   | 'Electrostarolysis'
   | 'Kazen'
 
-export type RefineryJobStatus = 'queued' | 'processing' | 'done'
+export type RefineryJobStatus = 'queued' | 'processing' | 'done' | 'collected' 
 
 export interface RefineryJob {
   id: string
@@ -104,6 +104,7 @@ export interface RefineryJob {
   paidByPlayerId: string
   yieldMultiplier: number     // e.g. 0.82 = 82%
   estimatedValueAUEC: number
+  actualSaleAUEC?: number
 }
 
 // ─── Cargo / Sales ────────────────────────────────────────────────────────────
