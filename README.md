@@ -1,4 +1,4 @@
-# Mojo Mining
+# Mojo Star Citizen Mining
 
 Cooperative mining operations manager for Star Citizen — real-time party coordination, scouting, refinery tracking, and payout splitting.
 
@@ -9,11 +9,11 @@ Cooperative mining operations manager for Star Citizen — real-time party coord
 Mojo Mining helps a Star Citizen mining party coordinate a session from start to finish:
 
 - **Create or join an operation** with a 6-character invite code
-- **Party view** — live overview of ships, crew, and status across the fleet
-- **Scout view** — pin rocks/clusters with location, mass, and ore composition
-- **Miner view** — track assigned rock, cargo fill per ore, and call for a bag swap
-- **Hauler view** — refinery queue, TDD prices, payout calculator
-- **Summary view** — refinery jobs, recorded sales, and a payout breakdown with `mo.TRADER` commands ready to copy into game chat
+- **Party view** ➔ live overview of ships, crew, and status across the fleet
+- **Scout view** ➔ pin rocks/clusters with location, mass, and ore composition
+- **Miner view** ➔ track assigned rock, cargo fill per ore, and call for a bag swap
+- **Hauler view** ➔ refinery queue, TDD prices, payout calculator
+- **Summary view** ➔ refinery jobs, recorded sales, and a payout breakdown with `mo.TRADER` commands ready to copy into game chat
 
 Everything syncs in real time across all connected players via Supabase Realtime — no refreshing needed.
 
@@ -40,7 +40,7 @@ VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-The anon/publishable key is safe to expose client-side — access is controlled by Supabase Row Level Security policies, not key secrecy.
+The anon/publishable key is safe to expose client-side ➔ access is controlled by Supabase Row Level Security policies, not key secrecy.
 
 ## Build
 
