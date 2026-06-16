@@ -15,7 +15,7 @@ Mojo Mining helps a Star Citizen mining party coordinate a session from start to
 - **Hauler view** ➔ refinery queue, TDD prices, payout calculator
 - **Summary view** ➔ refinery jobs, recorded sales, and a payout breakdown with `mo.TRADER` commands ready to copy into game chat
 
-Everything syncs in real time across all connected players via Supabase Realtime — no refreshing needed.
+Everything syncs in real time across all connected players via Supabase Realtime ➔ no refreshing needed.
 
 ## Tech stack
 
