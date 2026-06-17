@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useMojoStore } from '@/store'
-import { useShallow } from 'zustand/react/shallow'
 import { Panel, PanelHeader, Btn, Avatar, Badge } from '@/components/ui'
 import { DollarSign, FlaskConical, ShoppingCart, Copy, Check, Plus } from 'lucide-react'
 import type { RefineryJob } from '@/types'
@@ -43,36 +42,31 @@ interface SummaryViewProps {
 }
 
 export function SummaryView({ currentPlayerId }: SummaryViewProps) {
-  const operation      = useMojoStore((s) => s.operation)
-  const addRefineryJob = useMojoStore((s) => s.addRefineryJob)
+  const operation         = useMojoStore((s) => s.operation)
+  const addRefineryJob    = useMojoStore((s) => s.addRefineryJob)
   const updateRefineryJob = useMojoStore((s) => s.updateRefineryJob)
-  const players        = operation.players
-  const jobs           = operation.refineryJobs
+  const players            = operation.players
+  const jobs               = operation.refineryJobs
 
   const [showAddJob, setShowAddJob] = useState(false)
   const [copiedCmd, setCopiedCmd]   = useState<string | null>(null)
   const [splitMode, setSplitMode]   = useState<'equal' | 'custom'>('equal')
 
-  // My jobs
   const myJobs = jobs.filter((j) => j.paidByPlayerId === currentPlayerId)
 
-  // Totals
   const totalRevenue = jobs.reduce((s, j) => s + (j.actualSaleAUEC ?? 0), 0)
   const totalFees    = jobs.reduce((s, j) => s + j.feePaid, 0)
   const netProfit    = totalRevenue - totalFees
 
-  // Payout calculation
   const activePlayers = players.filter((p) => p.status !== 'offline')
   const share         = activePlayers.length > 0 ? Math.floor(netProfit / activePlayers.length) : 0
 
-  // Per player: base share + fee reimbursement
   const payouts = activePlayers.map((p) => {
-    const myFees = jobs.filter((j) => j.paidByPlayerId === p.id).reduce((s, j) => s + j.feePaid, 0)
+    const myFees  = jobs.filter((j) => j.paidByPlayerId === p.id).reduce((s, j) => s + j.feePaid, 0)
     const mySales = jobs.filter((j) => j.paidByPlayerId === p.id).reduce((s, j) => s + (j.actualSaleAUEC ?? 0), 0)
     return { player: p, share, feeReimbursement: myFees, total: share + myFees, mySales }
   })
 
-  // Who owes what — seller keeps their sales, pays others
   const sellerPayouts = payouts.map((po) => {
     const owes = po.total - po.mySales
     return { ...po, owes }
@@ -88,7 +82,6 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
   return (
     <div className="space-y-6 animate-fadeIn">
 
-      {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
@@ -101,7 +94,6 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Gross revenue', value: totalRevenue.toLocaleString(), sub: 'aUEC settled', color: 'text-emerald-400' },
@@ -119,7 +111,6 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* Refinery Jobs */}
         <Panel>
           <PanelHeader
             title={<span className="flex items-center gap-2"><FlaskConical className="w-3.5 h-3.5" /> Refinery jobs</span>}
@@ -142,7 +133,6 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
           </div>
         </Panel>
 
-        {/* Payout */}
         <Panel>
           <PanelHeader
             title={<span className="flex items-center gap-2"><ShoppingCart className="w-3.5 h-3.5" /> Payout</span>}
@@ -177,7 +167,6 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
             )}
           </div>
 
-          {/* mo.TRADER commands */}
           {totalRevenue > 0 && (
             <div className="p-4 border-t border-slate-800 space-y-2">
               <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-2">mo.TRADER commands</div>
@@ -204,7 +193,6 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
         </Panel>
       </div>
 
-      {/* Add Job Modal */}
       {showAddJob && (
         <AddJobModal
           currentPlayerId={currentPlayerId}
@@ -217,15 +205,13 @@ export function SummaryView({ currentPlayerId }: SummaryViewProps) {
   )
 }
 
-// ─── JobRow ───────────────────────────────────────────────────────────────────
-
 function JobRow({ job, players, currentPlayerId, onUpdate }: {
   job: RefineryJob
   players: ReturnType<typeof useMojoStore.getState>['operation']['players']
   currentPlayerId: string
   onUpdate: (patch: Partial<RefineryJob>) => void
 }) {
-  const [editSale, setEditSale] = useState(false)
+  const [editSale, setEditSale]   = useState(false)
   const [saleInput, setSaleInput] = useState(job.actualSaleAUEC?.toString() ?? '')
 
   const seller = players.find((p) => p.id === job.paidByPlayerId)
@@ -277,6 +263,7 @@ function JobRow({ job, players, currentPlayerId, onUpdate }: {
                   type="number"
                   value={saleInput}
                   onChange={(e) => setSaleInput(e.target.value)}
+                  onWheel={(e) => e.currentTarget.blur()}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') { onUpdate({ actualSaleAUEC: Number(saleInput) }); setEditSale(false) }
                     if (e.key === 'Escape') setEditSale(false)
@@ -298,8 +285,6 @@ function JobRow({ job, players, currentPlayerId, onUpdate }: {
     </div>
   )
 }
-
-// ─── AddJobModal ──────────────────────────────────────────────────────────────
 
 function AddJobModal({ currentPlayerId, players, onClose, onAdd }: {
   currentPlayerId: string
@@ -336,16 +321,17 @@ function AddJobModal({ currentPlayerId, players, onClose, onAdd }: {
   }
 
   return (
-  <div className="modal-overlay">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+    <div className="modal-overlay">
+      <div className="modal-content-lg">
+
+        <div className="modal-header flex items-center justify-between px-5 py-3 border-b border-slate-800">
           <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-violet-400" /> Add Refinery Job
           </h2>
           <button onClick={onClose} className="text-slate-500 hover:text-slate-300 cursor-pointer">✕</button>
         </div>
 
-        <div className="p-5 space-y-3">
+        <div className="modal-body p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ore</label>
@@ -366,6 +352,7 @@ function AddJobModal({ currentPlayerId, players, onClose, onAdd }: {
                 placeholder="e.g. 32"
                 value={rawSCU}
                 onChange={(e) => setRawSCU(e.target.value === '' ? '' : Number(e.target.value))}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="w-full bg-slate-950 border border-slate-800 text-sm text-amber-400 font-mono rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500 placeholder-slate-600"
               />
             </div>
@@ -417,12 +404,13 @@ function AddJobModal({ currentPlayerId, players, onClose, onAdd }: {
               placeholder="e.g. 24000"
               value={fee}
               onChange={(e) => setFee(e.target.value === '' ? '' : Number(e.target.value))}
+              onWheel={(e) => e.currentTarget.blur()}
               className="w-full bg-slate-950 border border-slate-800 text-sm text-amber-400 font-mono rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500 placeholder-slate-600"
             />
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
+        <div className="modal-footer flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
           <Btn onClick={onClose}>Cancel</Btn>
           <Btn variant="primary" onClick={handleSubmit} disabled={!ore || !rawSCU || !fee}
             className="bg-violet-500 hover:bg-violet-400">

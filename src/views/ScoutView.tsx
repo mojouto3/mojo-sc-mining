@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { Plus, Radar, CheckCircle2, Circle, Loader } from 'lucide-react'
 import { useMojoStore } from '@/store'
-import { RockCard } from '@/components/RockCard'
+import { ClusterCard } from '@/components/ClusterCard'
 import { AddRockModal } from '@/components/AddRockModal'
 import { EmptyState, Btn, Panel, PanelHeader, StatCard } from '@/components/ui'
 import type { RockStatus } from '@/types'
 
 const STATUS_FILTERS: { value: RockStatus | 'all'; label: string }[] = [
   { value: 'all',      label: 'All' },
-  { value: 'scouted',  label: 'Scouted' },
+  { value: 'scouted',  label: 'Discovered' },
   { value: 'en_route', label: 'En Route' },
   { value: 'mining',   label: 'Mining' },
   { value: 'done',     label: 'Done' },
@@ -22,24 +22,23 @@ export function ScoutView() {
 
   const { rocks, players } = operation
 
-  // Players that can be dispatched as miners
   const miners = players.filter(
     (p) => p.operationRole === 'miner' || p.operationRole === 'raw_hauler'
   )
 
-  // Scout handle — first scout player or fallback
   const scout = players.find((p) => p.operationRole === 'scout')
   const scoutHandle = scout?.handle ?? 'Scout'
 
-  // Filtered rocks
   const filtered = filter === 'all'
     ? rocks
     : rocks.filter((r) => r.status === filter)
 
-  // Stats
-  const active  = rocks.filter((r) => r.status !== 'done').length
-  const mining  = rocks.filter((r) => r.status === 'mining').length
-  const done    = rocks.filter((r) => r.status === 'done').length
+  // newest first
+  const sorted = [...filtered].sort((a, b) => b.scoutedAt - a.scoutedAt)
+
+  const active   = rocks.filter((r) => r.status !== 'done').length
+  const mining   = rocks.filter((r) => r.status === 'mining').length
+  const done     = rocks.filter((r) => r.status === 'done').length
   const assigned = rocks.filter((r) => r.assignedMinerId).length
 
   return (
@@ -53,7 +52,7 @@ export function ScoutView() {
             Scout View
           </h2>
           <p className="text-xs text-slate-500 font-mono mt-0.5">
-            Pin rocks, log ore composition, dispatch miners
+            Pin clusters, log signatures, track discovery
           </p>
         </div>
         <Btn
@@ -91,9 +90,9 @@ export function ScoutView() {
                     : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700'
                 }`}
               >
-                {value === 'mining'   && <Loader    className="w-3 h-3 animate-spin" />}
+                {value === 'mining'   && <Loader       className="w-3 h-3 animate-spin" />}
                 {value === 'done'     && <CheckCircle2 className="w-3 h-3" />}
-                {value === 'scouted'  && <Circle    className="w-3 h-3" />}
+                {value === 'scouted'  && <Circle       className="w-3 h-3" />}
                 {label}
                 <span className="opacity-60">({count})</span>
               </button>
@@ -102,7 +101,7 @@ export function ScoutView() {
         </div>
       )}
 
-      {/* Rock list */}
+      {/* Cluster grid */}
       {rocks.length === 0 ? (
         <EmptyState
           icon={<Radar className="w-10 h-10" />}
@@ -116,14 +115,14 @@ export function ScoutView() {
             </Btn>
           }
         />
-      ) : filtered.length === 0 ? (
+      ) : sorted.length === 0 ? (
         <div className="text-center py-10 text-xs text-slate-600 font-mono">
           No rocks with status "{filter}"
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((rock) => (
-            <RockCard key={rock.id} rock={rock} miners={miners} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {sorted.map((rock) => (
+            <ClusterCard key={rock.id} rock={rock} miners={miners} />
           ))}
         </div>
       )}
@@ -133,7 +132,7 @@ export function ScoutView() {
         <Panel>
           <PanelHeader
             title="Active miners"
-            subtitle="Players available for dispatch"
+            subtitle="Who's working what"
           />
           <div className="divide-y divide-slate-800/40">
             {miners.map((miner) => {
@@ -147,10 +146,7 @@ export function ScoutView() {
                     {miner.handle}
                   </span>
                   <span className="text-[10px] font-mono text-slate-500">
-                    {assignedRock
-                      ? `→ ${assignedRock.location}`
-                      : 'Unassigned'
-                    }
+                    {assignedRock ? `→ ${assignedRock.location}` : 'Unassigned'}
                   </span>
                 </div>
               )
