@@ -50,10 +50,9 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(2,8,23,0.88)' }}>
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl">
-
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header flex items-center justify-between px-5 py-3 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <Ship className="w-4 h-4 text-amber-500" />
             <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Add Ship</h2>
@@ -63,7 +62,7 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
           </button>
         </div>
 
-        <div className="p-5 space-y-3">
+        <div className="modal-body p-5 space-y-3">
           <div>
             <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">Ship model</label>
             <Combobox
@@ -77,7 +76,6 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
               }))}
             />
           </div>
-
           <div>
             <label className="block text-[10px] font-mono text-slate-400 uppercase mb-1.5">
               Current location <span className="text-slate-600">(optional)</span>
@@ -93,13 +91,10 @@ export function AddShipModal({ onClose, currentPlayerId }: Props) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
+        <div className="modal-footer flex justify-end gap-2 px-5 py-3 border-t border-slate-800">
           <Btn onClick={onClose}>Cancel</Btn>
-          <Btn variant="primary" onClick={handleSubmit}>
-            Add ship
-          </Btn>
+          <Btn variant="primary" onClick={handleSubmit}>Add ship</Btn>
         </div>
-
       </div>
     </div>
   )
