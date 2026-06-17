@@ -111,7 +111,7 @@ export function PartyView({ currentPlayerId }: PartyViewProps) {
             </Btn>
           }
         />
-      ) : (
+     ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Scout */}
           <div className="space-y-3">
@@ -120,7 +120,7 @@ export function PartyView({ currentPlayerId }: PartyViewProps) {
             </div>
             {scoutShips.length === 0
               ? <div className="text-[11px] text-slate-700 font-mono text-center py-4 border border-dashed border-slate-800 rounded-lg">No scout ships</div>
-              : scoutShips.map((ship) => <ShipCard key={ship.id} ship={ship} players={players} />)
+              : scoutShips.map((ship) => <ShipCard key={ship.id} ship={ship} players={players} currentPlayerId={currentPlayerId} />)
             }
           </div>
 
@@ -131,7 +131,7 @@ export function PartyView({ currentPlayerId }: PartyViewProps) {
             </div>
             {miningShips.length === 0
               ? <div className="text-[11px] text-slate-700 font-mono text-center py-4 border border-dashed border-slate-800 rounded-lg">No mining ships</div>
-              : miningShips.map((ship) => <ShipCard key={ship.id} ship={ship} players={players} />)
+              : miningShips.map((ship) => <ShipCard key={ship.id} ship={ship} players={players} currentPlayerId={currentPlayerId} />)
             }
           </div>
 
@@ -142,7 +142,7 @@ export function PartyView({ currentPlayerId }: PartyViewProps) {
             </div>
             {haulingShips.length === 0
               ? <div className="text-[11px] text-slate-700 font-mono text-center py-4 border border-dashed border-slate-800 rounded-lg">No hauling ships</div>
-              : haulingShips.map((ship) => <ShipCard key={ship.id} ship={ship} players={players} />)
+              : haulingShips.map((ship) => <ShipCard key={ship.id} ship={ship} players={players} currentPlayerId={currentPlayerId} />)
             }
           </div>
         </div>
